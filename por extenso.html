@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valor por Extenso</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        #resultado {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Conversor de Valor para Extenso</h1>
+    <label for="valor">Insira um valor em reais (0,01 a 40.000.000,00):</label><br>
+    <input type="text" id="valor" placeholder="Ex: 1234.56"><br>
+    <button onclick="converterParaExtenso()">Converter</button>
+    <div id="resultado"></div>
+
+    <script>
+        const unidades = ["", "um", "dois", "três", "quatro", "cinco", "seis", "sete", "oito", "nove"];
+        const dezenas = ["", "dez", "vinte", "trinta", "quarenta", "cinquenta", "sessenta", "setenta", "oitenta", "noventa"];
+        const especiais = ["dez", "onze", "doze", "treze", "quatorze", "quinze", "dezesseis", "dezessete", "dezoito", "dezenove"];
+        const centenas = ["", "cento", "duzentos", "trezentos", "quatrocentos", "quinhentos", "seiscentos", "setecentos", "oitocentos", "novecentos"];
+
+        function numeroParaExtenso(numero) {
+            if (numero === 0) return "zero";
+            if (numero < 10) return unidades[numero];
+            if (numero < 20) return especiais[numero - 10];
+            if (numero < 100) return dezenas[Math.floor(numero / 10)] + (numero % 10 !== 0 ? " e " + unidades[numero % 10] : "");
+            if (numero === 100) return "cem";
+            if (numero < 1000) return centenas[Math.floor(numero / 100)] + (numero % 100 !== 0 ? " e " + numeroParaExtenso(numero % 100) : "");
+            if (numero < 1000000) {
+                const milhares = Math.floor(numero / 1000);
+                const resto = numero % 1000;
+                return numeroParaExtenso(milhares) + " mil" + (resto !== 0 ? " e " + numeroParaExtenso(resto) : "");
+            }
+            if (numero < 1000000000) {
+                const milhoes = Math.floor(numero / 1000000);
+                const resto = numero % 1000000;
+                return numeroParaExtenso(milhoes) + " milhão" + (milhoes > 1 ? "s" : "") + (resto !== 0 ? " e " + numeroParaExtenso(resto) : "");
+            }
+            return "";
+        }
+
+        function converterParaExtenso() {
+            const input = document.getElementById("valor").value.replace(",", ".");
+            const valor = parseFloat(input);
+
+            if (isNaN(valor) || valor < 0.01 || valor > 40000000) {
+                document.getElementById("resultado").innerText = "Por favor, insira um valor válido entre 0,01 e 40.000.000,00.";
+                return;
+            }
+
+            const reais = Math.floor(valor);
+            const centavos = Math.round((valor - reais) * 100);
+
+            let extensoReais = reais === 0 ? "" : numeroParaExtenso(reais) + (reais === 1 ? " real" : " reais");
+            let extensoCentavos = centavos === 0 ? "" : numeroParaExtenso(centavos) + (centavos === 1 ? " centavo" : " centavos");
+
+            let resultado = "";
+            if (extensoReais && extensoCentavos) {
+                resultado = extensoReais + " e " + extensoCentavos;
+            } else {
+                resultado = extensoReais || extensoCentavos;
+            }
+
+            document.getElementById("resultado").innerText = resultado.charAt(0).toUpperCase() + resultado.slice(1) + ".";
+        }
+    </script>
+</body>
+</html>
